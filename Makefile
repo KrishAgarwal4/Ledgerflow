@@ -1,4 +1,4 @@
-.PHONY: setup test dev-backend dev-frontend seed verify-ledger chaos-storm chaos-overdraft docker-up docker-down
+.PHONY: setup test dev-backend dev-frontend seed verify-ledger chaos-storm chaos-overdraft benchmark migrate cli-status cli-balance docker-up docker-down
 
 setup:
 	python3 -m venv backend/venv
@@ -9,8 +9,20 @@ setup:
 test:
 	PYTHONPATH=. backend/venv/bin/pytest backend/tests -v
 
+migrate:
+	PYTHONPATH=. backend/venv/bin/alembic -c backend/alembic.ini upgrade head
+
 seed:
 	PYTHONPATH=. backend/venv/bin/python -m backend.app.seed.seed_data
+
+benchmark:
+	PYTHONPATH=. backend/venv/bin/python scripts/benchmark.py
+
+cli-status:
+	PYTHONPATH=. backend/venv/bin/python -m backend.cli status
+
+cli-balance:
+	PYTHONPATH=. backend/venv/bin/python -m backend.cli ledger balance
 
 dev-backend:
 	PYTHONPATH=. backend/venv/bin/uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
